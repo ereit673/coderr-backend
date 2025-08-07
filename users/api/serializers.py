@@ -8,6 +8,11 @@ User = get_user_model()
 
 
 class UserSerializer(serializers.ModelSerializer):
+    """
+    Serializer for user registration and representation.
+    Handles validation for password confirmation, unique username/email,
+    and enforces user type choices.
+    """
     user_id = serializers.IntegerField(source='id', read_only=True)
     password = serializers.CharField(write_only=True, required=True)
     repeated_password = serializers.CharField(write_only=True, required=True)
@@ -28,6 +33,9 @@ class UserSerializer(serializers.ModelSerializer):
                   'repeated_password', 'user_id', 'type']
 
     def validate(self, data):
+        """
+        Validate that the password and repeated_password match.
+        """
         if data['password'] != data['repeated_password']:
             raise serializers.ValidationError(
                 {'repeated_password': "Passwords do not match."})

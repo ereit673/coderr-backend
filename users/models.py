@@ -11,7 +11,8 @@ class CustomUser(AbstractUser):
         ('business', 'Business'),
         ('customer', 'Customer'),
     ]
-
+    username = models.CharField(max_length=150, unique=True)
+    email = models.EmailField(unique=True)
     type = models.CharField(
         max_length=50,
         choices=TYPE_CHOICES,

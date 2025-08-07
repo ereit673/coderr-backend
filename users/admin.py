@@ -14,4 +14,4 @@ class CustomUserAdmin(UserAdmin):
     fieldsets = UserAdmin.fieldsets + (
         (None, {'fields': ('type',)}),
     )
-    list_display = UserAdmin.list_display + ('type',)
+    list_display = UserAdmin.list_display + ('type', )

@@ -42,6 +42,10 @@ class UserSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
+        """
+        Create a new user instance with hashed password,
+        removing repeated_password from the data.
+        """
         validated_data.pop('repeated_password')
         password = validated_data.pop('password')
 

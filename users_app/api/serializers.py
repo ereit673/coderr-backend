@@ -3,6 +3,7 @@ from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 
+from ..models import Profile
 
 User = get_user_model()
 
@@ -52,4 +53,60 @@ class UserSerializer(serializers.ModelSerializer):
         user = User(**validated_data)
         user.set_password(password)
         user.save()
+        Profile.objects.create(user=user)
         return user
+
+
+class ProfileSerializer(serializers.ModelSerializer):
+    """
+    Serializer for user profile representation.
+    Excludes password and repeated_password fields.
+    """
+    user = serializers.IntegerField(source='user.id', read_only=True)
+    type = serializers.CharField(source='user.type', read_only=True)
+    username = serializers.CharField(source='user.username', read_only=True)
+    email = serializers.EmailField(source='user.email')
+
+    class Meta:
+        model = Profile
+        fields = [
+            'user',
+            'username',
+            'first_name',
+            'last_name',
+            'file',
+            'location',
+            'tel',
+            'description',
+            'working_hours',
+            'type',
+            'email',
+            'created_at'
+        ]
+
+    def validate_email(self, value):
+        """
+        Validate that the email is unique across all users.
+        """
+        user = self.instance.user if self.instance else None
+        if user and user.email == value:
+            return value
+        if User.objects.filter(email=value).exists():
+            raise serializers.ValidationError("Email already exists.")
+        return value
+
+    def update(self, instance, validated_data):
+        """
+        Update the profile instance with validated data.
+        """
+        email_data = validated_data.pop('user', {}).get('email')
+        if email_data and email_data != instance.user.email:
+            instance.user.email = email_data
+            instance.user.save()
+
+        for attr in ['first_name', 'last_name', 'location', 'tel', 'description', 'working_hours']:
+            setattr(instance, attr, validated_data.get(
+                attr, getattr(instance, attr)))
+
+        instance.save()
+        return instance

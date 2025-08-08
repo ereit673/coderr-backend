@@ -1,10 +1,18 @@
-from rest_framework import status
+from django.contrib.auth import get_user_model
+from django.shortcuts import get_object_or_404
+
+from rest_framework import generics, status
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .serializers import UserSerializer
+from .permissions import IsUserOrReadOnly
+from .serializers import UserSerializer, ProfileSerializer
+from ..models import Profile
+
+User = get_user_model()
 
 
 class RegistrationView(APIView):
@@ -78,3 +86,35 @@ class CustomAuthToken(ObtainAuthToken):
             'user_id': user.id
         }
         return Response(response_data, status=status.HTTP_200_OK)
+
+
+class ProfileView(generics.RetrieveUpdateAPIView):
+    """
+    API view to retrieve and update user profiles.
+
+    Allows authenticated users to view and edit their own profile.
+    Other users can only read the profile.
+    """
+    serializer_class = ProfileSerializer
+    permission_classes = [IsAuthenticated, IsUserOrReadOnly]
+    allowed_methods = ['GET', 'PATCH']
+
+    def get_object(self):
+        """
+        Retrieve the profile object based on the user ID from the URL.
+
+        Returns:
+            Profile instance associated with the user ID.
+        """
+        user_id = self.kwargs['pk']
+        return get_object_or_404(Profile, user__id=user_id)
+
+    def perform_update(self, serializer):
+        """
+        Save the updated profile instance.
+
+        Ensures that the user has permission to update the profile.
+        """
+        instance = self.get_object()
+        self.check_object_permissions(self.request, instance)
+        serializer.save()

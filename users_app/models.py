@@ -11,7 +11,7 @@ class CustomUser(AbstractUser):
 
     Fields:
         - username: Unique username for authentication.
-        - email: Unique email address for contact and login.
+        - email: Unique email address.
         - type: Specifies the user category; must be 'business' or 'customer'.
     """
     TYPE_CHOICES = [
@@ -29,3 +29,29 @@ class CustomUser(AbstractUser):
 
     def __str__(self):
         return self.username
+
+
+class Profile(models.Model):
+    """
+    User profile model linked to CustomUser.
+
+    Contains additional user information such as name, contact details,
+    and profile picture. Automatically creates a profile when a user is created.
+    """
+    user = models.OneToOneField(
+        CustomUser, on_delete=models.CASCADE, related_name='profile')
+    first_name = models.CharField(
+        max_length=30, blank=True, null=False, default='')
+    last_name = models.CharField(
+        max_length=30, blank=True, null=False, default='')
+    file = models.FileField(upload_to='profiles/', blank=True, null=True)
+    location = models.CharField(
+        max_length=255, blank=True, null=False, default='')
+    tel = models.CharField(max_length=15, blank=True, null=False, default='')
+    description = models.TextField(blank=True, null=False, default='')
+    working_hours = models.CharField(
+        max_length=50, blank=True, null=False, default='')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.username}'s Profile"

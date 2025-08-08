@@ -104,6 +104,10 @@ class ProfileSerializer(serializers.ModelSerializer):
             instance.user.email = email_data
             instance.user.save()
 
+        file = validated_data.get('file')
+        if file:
+            instance.file = file
+
         for attr in ['first_name', 'last_name', 'location', 'tel', 'description', 'working_hours']:
             setattr(instance, attr, validated_data.get(
                 attr, getattr(instance, attr)))
@@ -133,5 +137,27 @@ class BusinessListSerializer(serializers.ModelSerializer):
             "tel",
             "description",
             "working_hours",
+            "type"
+        ]
+
+
+class CustomerListSerializer(serializers.ModelSerializer):
+    """
+    Serializer for listing customer profiles.
+    Includes only essential fields for customer profiles.
+    """
+    user = serializers.IntegerField(source='user.id', read_only=True)
+    type = serializers.CharField(source='user.type', read_only=True)
+    username = serializers.CharField(source='user.username', read_only=True)
+
+    class Meta:
+        model = Profile
+        fields = [
+            "user",
+            "username",
+            "first_name",
+            "last_name",
+            "file",
+            "uploaded_at",
             "type"
         ]

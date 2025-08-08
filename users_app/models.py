@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.utils import timezone
 
 
 class CustomUser(AbstractUser):
@@ -45,6 +46,7 @@ class Profile(models.Model):
     last_name = models.CharField(
         max_length=30, blank=True, null=False, default='')
     file = models.FileField(upload_to='profiles/', blank=True, null=True)
+    uploaded_at = models.DateTimeField(null=True, blank=True)
     location = models.CharField(
         max_length=255, blank=True, null=False, default='')
     tel = models.CharField(max_length=15, blank=True, null=False, default='')
@@ -55,3 +57,23 @@ class Profile(models.Model):
 
     def __str__(self):
         return f"{self.user.username}'s Profile"
+
+    def save(self, *args, **kwargs):
+        """        
+        Override save method to set uploaded_at field when the profile is saved.
+
+        If the profile already exists, check if the file has changed and update
+        the uploaded_at timestamp accordingly.
+        """
+
+        if self.pk:
+            old_file = Profile.objects.get(pk=self.pk).file
+            if old_file != self.file:
+                self.uploaded_at = timezone.now()
+        else:
+            if self.file is not None:
+                self.uploaded_at = timezone.now()
+            else:
+                self.uploaded_at = None
+
+        super().save(*args, **kwargs)

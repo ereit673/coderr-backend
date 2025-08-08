@@ -7,5 +7,7 @@ urlpatterns = [
     path('login/', views.CustomAuthToken.as_view(), name='login'),
     path('profile/<int:pk>/', views.ProfileView.as_view(), name='profile'),
     path('profiles/business/', views.BusinessProfileListView.as_view(),
-         name='business_profiles')
+         name='business_profiles'),
+    path('profiles/customer/', views.CustomerProfileListView.as_view(),
+         name='customer_profiles'),
 ]

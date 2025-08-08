@@ -9,7 +9,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .permissions import IsUserOrReadOnly
-from .serializers import UserSerializer, ProfileSerializer, BusinessListSerializer
+from .serializers import UserSerializer, ProfileSerializer, BusinessListSerializer, CustomerListSerializer
 from ..models import Profile
 
 User = get_user_model()
@@ -129,3 +129,14 @@ class BusinessProfileListView(generics.ListAPIView):
     serializer_class = BusinessListSerializer
     permission_classes = [IsAuthenticated]
     queryset = Profile.objects.filter(user__type='business')
+
+
+class CustomerProfileListView(generics.ListAPIView):
+    """
+    API view to list all customer profiles.
+
+    This view allows users to retrieve a list of all customer profiles.
+    """
+    serializer_class = CustomerListSerializer
+    permission_classes = [IsAuthenticated]
+    queryset = Profile.objects.filter(user__type='customer')

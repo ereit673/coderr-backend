@@ -137,7 +137,7 @@ class ProfileGetTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
 
-class ProfileGetTests(APITestCase):
+class ProfilePatchTests(APITestCase):
     """
     Tests for updating user profiles via PATCH requests.
     Includes tests for successful updates, unauthorized access,

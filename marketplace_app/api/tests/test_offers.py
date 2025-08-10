@@ -246,13 +246,6 @@ class OffersRetrieveUpdateDeleteTests(APITestCase):
         )
         Profile.objects.create(user=self.customer_user)
 
-        offer = Offer.objects.create(
-            title="Test Offer",
-            image=None,
-            description="This is a test offer description.",
-            creator=self.business_user
-        )
-
         self.offer_data = {
             "title": "Test Offer Title",
             "image": None,

@@ -10,7 +10,14 @@ User = get_user_model()
 
 
 class OffersGetPostTests(APITestCase):
+    """
+    Test cases for Offer List and Create API endpoints.
+    """
+
     def setUp(self):
+        """
+        Set up test data for Offer List and Create tests.
+        """
         self.url = reverse('offers-list')
         self.business_user = User.objects.create_user(
             username="business",
@@ -28,14 +35,26 @@ class OffersGetPostTests(APITestCase):
         Profile.objects.create(user=self.customer_user)
 
     def test_get_offers_success(self):
+        """
+        Test retrieving offers successfully.
+        """
+        self.client.force_authenticate(user=self.business_user)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_get_offers_bad_request(self):
+        """
+        Test retrieving offers with invalid query parameters.
+        """
         response = self.client.get(self.url, {'creator_id': 9999999})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_post_offer_success(self):
+        """
+        Test creating an offer successfully.
+        """
         self.client.force_authenticate(user=self.business_user)
         data = {
             "title": "Test Offer Title",
@@ -85,6 +104,9 @@ class OffersGetPostTests(APITestCase):
         self.assertEqual(response.data['title'], data['title'])
 
     def test_post_offer_unauthenticated(self):
+        """
+        Test creating an offer without authentication.
+        """
         data = {
             "title": "Test Offer Title",
             "image": None,
@@ -132,6 +154,9 @@ class OffersGetPostTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_post_offer_invalid_data(self):
+        """
+        Test creating an offer with invalid data.
+        """
         self.client.force_authenticate(user=self.business_user)
         data = {
             # title is missing
@@ -180,6 +205,9 @@ class OffersGetPostTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_post_offer_invalid_user_type(self):
+        """
+        Test creating an offer as a user who is not a business.
+        """
         self.client.force_authenticate(user=self.customer_user)
         data = {
             "title": "Test Offer Title",
@@ -229,6 +257,10 @@ class OffersGetPostTests(APITestCase):
 
 
 class OffersRetrieveUpdateDeleteTests(APITestCase):
+    """
+    Test cases for Offer Retrieve, Update, and Delete API endpoints.
+    """
+
     def setUp(self):
         self.url = reverse('offers-list')
         self.business_user = User.objects.create_user(
@@ -294,6 +326,9 @@ class OffersRetrieveUpdateDeleteTests(APITestCase):
         self.offer_id = response.data['id']
 
     def test_get_offer_detail_success(self):
+        """
+        Test retrieving offer details successfully.
+        """
         self.client.force_authenticate(user=self.business_user)
         detail_url = self.url + f'{self.offer_id}/'
         response = self.client.get(detail_url)
@@ -301,17 +336,26 @@ class OffersRetrieveUpdateDeleteTests(APITestCase):
         self.assertEqual(response.data['title'], self.offer_data['title'])
 
     def test_get_offer_detail_unauthenticated(self):
+        """
+        Test retrieving offer details without authentication.
+        """
         detail_url = self.url + f'{self.offer_id}/'
         response = self.client.get(detail_url)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_get_offer_detail_invalid_id(self):
+        """
+        Test retrieving offer details with an invalid ID.
+        """
         self.client.force_authenticate(user=self.business_user)
         detail_url = self.url + '9999999/'
         response = self.client.get(detail_url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_update_offer_success(self):
+        """
+        Test updating an offer successfully.
+        """
         self.client.force_authenticate(user=self.business_user)
         detail_url = self.url + f'{self.offer_id}/'
         updated_data = self.offer_data.copy()
@@ -321,34 +365,52 @@ class OffersRetrieveUpdateDeleteTests(APITestCase):
         self.assertEqual(response.data['title'], updated_data['title'])
 
     def test_update_offer_unauthenticated(self):
+        """
+        Test updating an offer without authentication.
+        """
         detail_url = self.url + f'{self.offer_id}/'
         response = self.client.put(detail_url, self.offer_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_update_offer_user_not_owner(self):
+        """
+        Test updating an offer as a user who is not the owner.
+        """
         self.client.force_authenticate(user=self.customer_user)
         detail_url = self.url + f'{self.offer_id}/'
         response = self.client.put(detail_url, self.offer_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_delete_offer_success(self):
+        """
+        Test deleting an offer successfully.
+        """
         self.client.force_authenticate(user=self.business_user)
         detail_url = self.url + f'{self.offer_id}/'
         response = self.client.delete(detail_url)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
     def test_delete_offer_unauthenticated(self):
+        """
+        Test deleting an offer without authentication.
+        """
         detail_url = self.url + f'{self.offer_id}/'
         response = self.client.delete(detail_url)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_delete_offer_user_not_owner(self):
+        """
+        Test deleting an offer as a user who is not the owner.
+        """
         self.client.force_authenticate(user=self.customer_user)
         detail_url = self.url + f'{self.offer_id}/'
         response = self.client.delete(detail_url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_delete_offer_invalid_id(self):
+        """
+        Test deleting an offer with an invalid ID.
+        """
         self.client.force_authenticate(user=self.business_user)
         detail_url = self.url + '9999999/'
         response = self.client.delete(detail_url)

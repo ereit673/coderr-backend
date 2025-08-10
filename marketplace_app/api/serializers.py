@@ -1,9 +1,20 @@
-from django.db.models import Min
+from urllib.parse import urlparse
 
+from django.db.models import Min
 from rest_framework import serializers
 
 from marketplace_app.models import Offer, OfferDetail, Order, Review
 from users_app.models import Profile
+
+
+class RelativeHyperlinkedIdentityField(serializers.HyperlinkedIdentityField):
+    def to_representation(self, value):
+        full_url = super().to_representation(value)
+        parsed = urlparse(full_url)
+        path = parsed.path
+        if path.startswith('/api'):
+            path = path[len('/api'):]
+        return path
 
 
 class UserDetailsSerializer(serializers.ModelSerializer):
@@ -18,7 +29,7 @@ class UserDetailsSerializer(serializers.ModelSerializer):
         ]
 
 
-class OfferDetailSerializer(serializers.ModelSerializer):
+class OfferDetailCreateSerializer(serializers.ModelSerializer):
     price = serializers.DecimalField(
         max_digits=10,
         decimal_places=2,
@@ -38,11 +49,25 @@ class OfferDetailSerializer(serializers.ModelSerializer):
         ]
 
 
-class OfferSerializer(serializers.ModelSerializer):
+class OfferDetailReadSerializer(serializers.ModelSerializer):
+    url = RelativeHyperlinkedIdentityField(
+        view_name='offerdetails-detail',
+        lookup_field='pk'
+    )
+
+    class Meta:
+        model = OfferDetail
+        fields = [
+            'id',
+            'url'
+        ]
+
+
+class OfferReadSerializer(serializers.ModelSerializer):
     min_price = serializers.SerializerMethodField()
     min_delivery_time = serializers.SerializerMethodField()
     user_details = UserDetailsSerializer(source='user.profile', read_only=True)
-    details = OfferDetailSerializer(many=True)
+    details = OfferDetailReadSerializer(many=True, read_only=True)
 
     class Meta:
         model = Offer
@@ -59,18 +84,24 @@ class OfferSerializer(serializers.ModelSerializer):
             'min_delivery_time',
             'user_details'
         ]
-        read_only_fields = [
-            'id',
-            'created_at',
-            'updated_at',
-
-        ]
 
     def get_min_price(self, obj):
         return obj.details.aggregate(min_price=Min('price'))['min_price'] or 0
 
     def get_min_delivery_time(self, obj):
         return obj.details.aggregate(min_delivery_time=Min('delivery_time_in_days'))['min_delivery_time']
+
+
+class OfferCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Offer
+        fields = [
+            'user',
+            'title',
+            'image',
+            'description',
+            'details'
+        ]
 
     def create(self, validated_data):
         details_data = validated_data.pop('details', [])

@@ -136,6 +136,44 @@ class ProfileGetTests(APITestCase):
         response = self.client.get(invalid_url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
+    def test_get_profiles_business(self):
+        """
+        Test retrieval of profiles with business type.
+        Should return a 200 status code and the list of profiles.
+        """
+        self.client.force_authenticate(user=self.user)
+        url = reverse('business_profiles')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_get_profiles_customer(self):
+        """
+        Test retrieval of profiles with customer type.
+        Should return a 200 status code and the list of profiles.
+        """
+        self.client.force_authenticate(user=self.user)
+        url = reverse('customer_profiles')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_get_profiles_business_unauthenticated(self):
+        """
+        Test retrieval of business profiles without authentication.
+        Should return a 401 status code indicating unauthorized access.
+        """
+        url = reverse('business_profiles')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_get_profiles_customer_unauthenticated(self):
+        """
+        Test retrieval of customer profiles without authentication.
+        Should return a 401 status code indicating unauthorized access.
+        """
+        url = reverse('customer_profiles')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
 
 class ProfilePatchTests(APITestCase):
     """

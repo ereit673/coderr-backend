@@ -59,7 +59,7 @@ class OfferSerializer(serializers.ModelSerializer):
             'min_delivery_time',
             'user_details'
         ]
-        ready_only_fields = [
+        read_only_fields = [
             'id',
             'created_at',
             'updated_at',

@@ -1,8 +1,8 @@
+from django.contrib.auth import get_user_model
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from django.contrib.auth import get_user_model
 from marketplace_app.models import Offer, OfferDetail
 from users_app.models import Profile
 

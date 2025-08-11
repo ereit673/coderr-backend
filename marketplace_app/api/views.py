@@ -80,6 +80,9 @@ class OfferDetailView(generics.RetrieveAPIView):
 
 
 class OrderListCreateView(generics.ListCreateAPIView):
+    """
+    View to list and create orders.
+    """
     queryset = Order.objects.all()
     serializer_class = OrderListSerializer
     permission_classes = [IsAuthenticated]
@@ -100,6 +103,9 @@ class OrderListCreateView(generics.ListCreateAPIView):
 
 
 class OrderUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
+    """
+    View to update and delete orders.
+    """
     queryset = Order.objects.all()
     serializer_class = OrderDetailSerializer
     http_method_names = ['patch', 'delete', 'options', 'head']
@@ -112,6 +118,9 @@ class OrderUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
 
 
 class OrderCountView(APIView):
+    """
+    View to retrieve the order count for a business user.
+    """
     permission_classes = [IsAuthenticated]
 
     def get(self, request, business_user_id, format=None):
@@ -124,6 +133,9 @@ class OrderCountView(APIView):
 
 
 class OrderCompleteCount(APIView):
+    """
+    View to retrieve the completed order count for a business user.
+    """
     permission_classes = [IsAuthenticated]
 
     def get(self, request, business_user_id, format=None):

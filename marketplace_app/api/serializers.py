@@ -210,6 +210,9 @@ class OfferRetrieveSerializer(serializers.ModelSerializer):
 
 
 class OrderListSerializer(serializers.ModelSerializer):
+    """
+    Serializer for listing and creating orders.
+    """
     title = serializers.CharField(source='offer.title', read_only=True)
     revisions = serializers.IntegerField(
         source='offer.revisions', read_only=True)
@@ -255,6 +258,9 @@ class OrderListSerializer(serializers.ModelSerializer):
         return Order.objects.create(customer_user=customer_user, business_user=business_user, offer=offer)
 
     def to_internal_value(self, data):
+        """
+        Validate the incoming data for order creation.
+        """
         try:
             return super().to_internal_value(data)
         except serializers.ValidationError as exception:
@@ -268,6 +274,9 @@ class OrderListSerializer(serializers.ModelSerializer):
 
 
 class OrderDetailSerializer(serializers.ModelSerializer):
+    """
+    Serializer for patching orders.
+    """
     title = serializers.CharField(source='offer.title', read_only=True)
     revisions = serializers.IntegerField(
         source='offer.revisions', read_only=True)
@@ -303,6 +312,9 @@ class OrderDetailSerializer(serializers.ModelSerializer):
         ]
 
     def validate(self, attrs):
+        """
+        Validate the incoming data for order updates.
+        """
         for field in self.initial_data:
             if field != 'status':
                 raise serializers.ValidationError(

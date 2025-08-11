@@ -4,6 +4,9 @@ from django.db.models import Min
 
 
 class OfferFilter(django_filters.FilterSet):
+    """
+    Filter for offers based on minimum price and maximum delivery time.
+    """
     min_price = django_filters.NumberFilter(method='filter_min_price')
     max_delivery_time = django_filters.NumberFilter(
         method='filter_max_delivery_time')

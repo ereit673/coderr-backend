@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from marketplace_app.models import Offer, OfferDetail
+from marketplace_app.models import Offer, OfferDetail, Order
 
 
 class OfferAdmin(admin.ModelAdmin):
@@ -20,5 +20,10 @@ class OfferDetailAdmin(admin.ModelAdmin):
     search_fields = ('offer__title', 'features')
 
 
+class OrderAdmin(admin.ModelAdmin):
+    list_display = ('id', 'customer_user', 'business_user', 'offer', 'status')
+
+
 admin.site.register(Offer, OfferAdmin)
 admin.site.register(OfferDetail, OfferDetailAdmin)
+admin.site.register(Order, OrderAdmin)

@@ -1,13 +1,19 @@
+from django.contrib.auth import get_user_model
 from django.db.models import Min, Q
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics, filters
+from rest_framework.exceptions import NotFound
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from .filters import OfferFilter
 from .permissions import IsBusiness, IsOfferOwner, IsCustomer
 from .serializers import OfferListReadSerializer, OfferCreateSerializer, OfferRetrieveSerializer, OfferDetailBaseSerializer, OrderListSerializer, OrderDetailSerializer
 from marketplace_app.models import Offer, OfferDetail, Order
+
+User = get_user_model()
 
 
 class OfferListCreateView(generics.ListCreateAPIView):
@@ -103,3 +109,28 @@ class OrderUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
             return [IsBusiness()]
         elif self.request.method == 'DELETE':
             return [IsAdminUser()]
+
+
+class OrderCountView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, business_user_id, format=None):
+        try:
+            User.objects.get(id=business_user_id, type='business')
+        except User.DoesNotExist:
+            raise NotFound("Business user with this id does not exist.")
+        count = Order.objects.filter(business_user=business_user_id).count()
+        return Response({'order_count': count})
+
+
+class OrderCompleteCount(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, business_user_id, format=None):
+        try:
+            User.objects.get(id=business_user_id, type='business')
+        except User.DoesNotExist:
+            raise NotFound("Business user with this id does not exist.")
+        count = Order.objects.filter(
+            business_user=business_user_id, status="completed").count()
+        return Response({'completed_order_count': count})

@@ -265,3 +265,47 @@ class OrderListSerializer(serializers.ModelSerializer):
                     if 'Invalid pk' in error_text or 'does not exist' in error_text:
                         raise NotFound(detail="Offer not found")
             raise
+
+
+class OrderDetailSerializer(serializers.ModelSerializer):
+    title = serializers.CharField(source='offer.title', read_only=True)
+    revisions = serializers.IntegerField(
+        source='offer.revisions', read_only=True)
+    delivery_time_in_days = serializers.IntegerField(
+        source='offer.delivery_time_in_days', read_only=True)
+    price = serializers.FloatField(source='offer.price', read_only=True)
+    features = serializers.JSONField(source='offer.features', read_only=True)
+    offer_type = serializers.CharField(
+        source='offer.offer_type', read_only=True)
+
+    class Meta:
+        model = Order
+        fields = [
+            'id',
+            'customer_user',
+            'business_user',
+            'title',
+            'revisions',
+            'delivery_time_in_days',
+            'price',
+            'features',
+            'offer_type',
+            'status',
+            'created_at',
+            'updated_at'
+        ]
+        read_only_fields = [
+            'id',
+            'customer_user',
+            'business_user',
+            'created_at',
+            'updated_at',
+        ]
+
+    def validate(self, attrs):
+        for field in self.initial_data:
+            if field != 'status':
+                raise serializers.ValidationError(
+                    "You can only update the 'status' field."
+                )
+        return attrs

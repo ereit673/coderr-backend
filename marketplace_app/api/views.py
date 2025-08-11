@@ -2,11 +2,11 @@ from django.db.models import Min, Q
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics, filters
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
 
 from .filters import OfferFilter
 from .permissions import IsBusiness, IsOfferOwner, IsCustomer
-from .serializers import OfferListReadSerializer, OfferCreateSerializer, OfferRetrieveSerializer, OfferDetailBaseSerializer, OrderListSerializer
+from .serializers import OfferListReadSerializer, OfferCreateSerializer, OfferRetrieveSerializer, OfferDetailBaseSerializer, OrderListSerializer, OrderDetailSerializer
 from marketplace_app.models import Offer, OfferDetail, Order
 
 
@@ -91,3 +91,15 @@ class OrderListCreateView(generics.ListCreateAPIView):
         if self.request.method == 'POST':
             return [IsCustomer(), IsAuthenticated()]
         return [permission() for permission in self.permission_classes]
+
+
+class OrderUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Order.objects.all()
+    serializer_class = OrderDetailSerializer
+    http_method_names = ['patch', 'delete', 'options', 'head']
+
+    def get_permissions(self):
+        if self.request.method == 'PATCH':
+            return [IsBusiness()]
+        elif self.request.method == 'DELETE':
+            return [IsAdminUser()]

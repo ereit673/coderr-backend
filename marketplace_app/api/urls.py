@@ -8,6 +8,6 @@ urlpatterns = [
          views.OfferRetrieveUpdateDestroyView.as_view(), name='offers-detail'),
     path('offerdetails/<int:pk>/', views.OfferDetailView.as_view(),
          name='offerdetails-detail'),
-
+    path('orders/', views.OrderListCreateView.as_view(), name='orders-list')
 
 ]

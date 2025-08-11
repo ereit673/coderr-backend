@@ -2,6 +2,7 @@ from urllib.parse import urlparse
 
 from django.db.models import Min
 from rest_framework import serializers
+from rest_framework.exceptions import NotFound
 
 from marketplace_app.models import Offer, OfferDetail, Order, Review
 from users_app.models import Profile
@@ -206,3 +207,61 @@ class OfferRetrieveSerializer(serializers.ModelSerializer):
 
     def get_min_delivery_time(self, obj):
         return obj.details.aggregate(min_delivery_time=Min('delivery_time_in_days'))['min_delivery_time']
+
+
+class OrderListSerializer(serializers.ModelSerializer):
+    title = serializers.CharField(source='offer.title', read_only=True)
+    revisions = serializers.IntegerField(
+        source='offer.revisions', read_only=True)
+    delivery_time_in_days = serializers.IntegerField(
+        source='offer.delivery_time_in_days', read_only=True)
+    price = serializers.FloatField(source='offer.price', read_only=True)
+    features = serializers.JSONField(source='offer.features', read_only=True)
+    offer_type = serializers.CharField(
+        source='offer.offer_type', read_only=True)
+    offer_detail_id = serializers.PrimaryKeyRelatedField(
+        write_only=True, source='offer', queryset=OfferDetail.objects.all())
+
+    class Meta:
+        model = Order
+        fields = [
+            'id',
+            'customer_user',
+            'business_user',
+            'title',
+            'revisions',
+            'delivery_time_in_days',
+            'price',
+            'features',
+            'offer_type',
+            'status',
+            'created_at',
+            'updated_at',
+            'offer_detail_id'
+        ]
+        read_only_fields = [
+            'id',
+            'customer_user',
+            'business_user',
+            'status',
+            'created_at',
+            'updated_at',
+        ]
+
+    def create(self, validated_data):
+        offer = validated_data['offer']
+        customer_user = self.context['request'].user
+        business_user = offer.offer.user
+        return Order.objects.create(customer_user=customer_user, business_user=business_user, offer=offer)
+
+    def to_internal_value(self, data):
+        try:
+            return super().to_internal_value(data)
+        except serializers.ValidationError as exception:
+            if 'offer_detail_id' in exception.detail:
+                errors = exception.detail['offer_detail_id']
+                for error in errors:
+                    error_text = str(error)
+                    if 'Invalid pk' in error_text or 'does not exist' in error_text:
+                        raise NotFound(detail="Offer not found")
+            raise

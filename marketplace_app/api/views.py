@@ -1,13 +1,13 @@
-from django.db.models import Min
+from django.db.models import Min, Q
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics, filters
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
 
 from .filters import OfferFilter
-from .permissions import IsBusiness, IsOfferOwner
-from .serializers import OfferListReadSerializer, OfferCreateSerializer, OfferRetrieveSerializer, OfferDetailBaseSerializer
-from marketplace_app.models import Offer, OfferDetail
+from .permissions import IsBusiness, IsOfferOwner, IsCustomer
+from .serializers import OfferListReadSerializer, OfferCreateSerializer, OfferRetrieveSerializer, OfferDetailBaseSerializer, OrderListSerializer
+from marketplace_app.models import Offer, OfferDetail, Order
 
 
 class OfferListCreateView(generics.ListCreateAPIView):
@@ -71,3 +71,23 @@ class OfferDetailView(generics.RetrieveAPIView):
     queryset = OfferDetail.objects.all()
     serializer_class = OfferDetailBaseSerializer
     permission_classes = [IsAuthenticated]
+
+
+class OrderListCreateView(generics.ListCreateAPIView):
+    queryset = Order.objects.all()
+    serializer_class = OrderListSerializer
+    permission_classes = [IsAuthenticated]
+
+    def perform_create(self, serializer):
+        serializer.save(customer_user=self.request.user)
+
+    def get_queryset(self):
+        user = self.request.user
+        return Order.objects.filter(
+            Q(customer_user=user) | Q(business_user=user)
+        )
+
+    def get_permissions(self):
+        if self.request.method == 'POST':
+            return [IsCustomer(), IsAuthenticated()]
+        return [permission() for permission in self.permission_classes]

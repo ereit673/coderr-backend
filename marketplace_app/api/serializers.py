@@ -8,6 +8,10 @@ from users_app.models import Profile
 
 
 class RelativeHyperlinkedIdentityField(serializers.HyperlinkedIdentityField):
+    """
+    Custom field to return a relative URL instead of an absolute one.
+    """
+
     def to_representation(self, value):
         full_url = super().to_representation(value)
         parsed = urlparse(full_url)
@@ -18,6 +22,9 @@ class RelativeHyperlinkedIdentityField(serializers.HyperlinkedIdentityField):
 
 
 class UserDetailsSerializer(serializers.ModelSerializer):
+    """
+    Serializer for user details in the Offer model.
+    """
     username = serializers.CharField(max_length=255, source='user.username')
 
     class Meta:
@@ -30,6 +37,9 @@ class UserDetailsSerializer(serializers.ModelSerializer):
 
 
 class OfferDetailCreateSerializer(serializers.ModelSerializer):
+    """
+    Serializer for creating OfferDetail with price validation.
+    """
     price = serializers.DecimalField(
         max_digits=10,
         decimal_places=2,
@@ -50,6 +60,9 @@ class OfferDetailCreateSerializer(serializers.ModelSerializer):
 
 
 class OfferDetailReadSerializer(serializers.ModelSerializer):
+    """
+    Serializer for reading OfferDetail with a relative URL.
+    """
     url = RelativeHyperlinkedIdentityField(
         view_name='offerdetails-detail',
         lookup_field='pk'
@@ -64,6 +77,9 @@ class OfferDetailReadSerializer(serializers.ModelSerializer):
 
 
 class OfferReadSerializer(serializers.ModelSerializer):
+    """
+    Serializer for reading Offer details with nested OfferDetails.
+    """
     min_price = serializers.SerializerMethodField()
     min_delivery_time = serializers.SerializerMethodField()
     user_details = UserDetailsSerializer(source='user.profile', read_only=True)
@@ -93,6 +109,9 @@ class OfferReadSerializer(serializers.ModelSerializer):
 
 
 class OfferCreateSerializer(serializers.ModelSerializer):
+    """
+    Serializer for creating an Offer with nested OfferDetails.
+    """
     details = OfferDetailCreateSerializer(many=True, required=False)
 
     class Meta:

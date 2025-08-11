@@ -93,10 +93,12 @@ class OfferReadSerializer(serializers.ModelSerializer):
 
 
 class OfferCreateSerializer(serializers.ModelSerializer):
+    details = OfferDetailCreateSerializer(many=True, required=False)
+
     class Meta:
         model = Offer
         fields = [
-            'user',
+            'id',
             'title',
             'image',
             'description',

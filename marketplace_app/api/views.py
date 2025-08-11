@@ -1,6 +1,9 @@
-from rest_framework import generics
+from django.db.models import Min
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import generics, filters
 from rest_framework.pagination import PageNumberPagination
 
+from .filters import OfferFilter
 from .serializers import OfferReadSerializer, OfferCreateSerializer
 from marketplace_app.models import Offer
 
@@ -9,7 +12,11 @@ class OfferListCreateView(generics.ListCreateAPIView):
     """
     View to list and create offers.
     """
-    queryset = Offer.objects.all()
+    filter_backends = [DjangoFilterBackend,
+                       filters.OrderingFilter, filters.SearchFilter]
+    filterset_class = OfferFilter
+    ordering_fields = ['updated_at', 'min_price']
+    search_fields = ['title', 'description']
     pagination_class = PageNumberPagination
 
     def perform_create(self, serializer):
@@ -19,6 +26,14 @@ class OfferListCreateView(generics.ListCreateAPIView):
         if self.request.method == 'POST':
             return OfferCreateSerializer
         return OfferReadSerializer
+
+    def get_queryset(self):
+        queryset = Offer.objects.all()
+        creator_id = self.request.query_params.get('creator_id')
+        if creator_id is not None:
+            queryset = queryset.filter(user__id=creator_id)
+        queryset = queryset.annotate(min_price=Min('details__price'))
+        return queryset
 
 
 class OfferDetailView(generics.RetrieveAPIView):

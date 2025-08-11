@@ -76,7 +76,7 @@ class OrdersGetPostTests(APITestCase):
         """
         self.client.force_authenticate(user=self.customer_user)
         data = {
-            "offer_detail_id": self.offer_id
+            "offer_detail_id": self.offer_detail_id
         }
         response = self.client.post(self.url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -87,7 +87,7 @@ class OrdersGetPostTests(APITestCase):
         """
         self.client.force_authenticate(user=self.customer_user)
         data = {
-            "offer": self.offer_id  # wrong key name
+            "offer": self.offer_detail_id  # wrong key name
         }
         response = self.client.post(self.url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -97,7 +97,7 @@ class OrdersGetPostTests(APITestCase):
         Test creation of an order without authentication.
         """
         data = {
-            "offer_detail_id": self.offer_id
+            "offer_detail_id": self.offer_detail_id
         }
         response = self.client.post(self.url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
@@ -108,7 +108,7 @@ class OrdersGetPostTests(APITestCase):
         """
         self.client.force_authenticate(user=self.business_user)
         data = {
-            "offer_detail_id": self.offer_id
+            "offer_detail_id": self.offer_detail_id
         }
         response = self.client.post(self.url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
@@ -119,7 +119,7 @@ class OrdersGetPostTests(APITestCase):
         """
         self.client.force_authenticate(user=self.customer_user)
         data = {
-            "offer_detail_id": self.offer_id + 99999  # wrong offer_id
+            "offer_detail_id": self.offer_detail_id + 99999  # wrong offer_id
         }
         response = self.client.post(self.url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
@@ -231,7 +231,7 @@ class OrdersPatchDeleteTests(APITestCase):
         """
         wrong_url = reverse(
             'orders-detail', kwargs={'pk': self.order.id + 99999})
-        self.client.force_authenticate(user=self.customer_user)
+        self.client.force_authenticate(user=self.business_user)
         data = {
             "status": "completed"
         }
@@ -371,7 +371,7 @@ class OrdersExtraTests(APITestCase):
         self.client.force_authenticate(user=self.business_user)
         response = self.client.get(url, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['order_count'], 2)
+        self.assertEqual(response.data['completed_order_count'], 2)
 
     def test_get_completed_order_count_not_authenticated(self):
         """

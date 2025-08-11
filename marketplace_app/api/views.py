@@ -2,11 +2,11 @@ from django.db.models import Min
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics, filters
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 
 from .filters import OfferFilter
-from .permissions import IsBusiness
-from .serializers import OfferReadSerializer, OfferCreateSerializer
+from .permissions import IsBusiness, IsOfferOwner
+from .serializers import OfferListReadSerializer, OfferCreateSerializer, OfferRetrieveSerializer
 from marketplace_app.models import Offer
 
 
@@ -28,7 +28,7 @@ class OfferListCreateView(generics.ListCreateAPIView):
     def get_serializer_class(self):
         if self.request.method == 'POST':
             return OfferCreateSerializer
-        return OfferReadSerializer
+        return OfferListReadSerializer
 
     def get_queryset(self):
         queryset = Offer.objects.all()
@@ -45,10 +45,28 @@ class OfferListCreateView(generics.ListCreateAPIView):
             return [permission() for permission in self.permission_classes]
 
 
+class OfferRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Offer.objects.all()
+    serializer_class = OfferRetrieveSerializer
+    permission_classes = [IsAuthenticated]
+    http_method_names = ['get', 'patch', 'delete', 'options', 'head']
+
+    def get_permissions(self):
+        if self.request.method in ['PATCH', 'DELETE']:
+            return [IsOfferOwner(), IsAuthenticated()]
+        else:
+            return [permission() for permission in self.permission_classes]
+
+    def get_serializer_class(self):
+        if self.request.method == 'PATCH':
+            return OfferCreateSerializer
+        else:
+            return self.serializer_class
+
+
 class OfferDetailView(generics.RetrieveAPIView):
     """
-    View to retrieve details of a specific offer.
+    View to retrieve offer details.
     """
-    # CHANGE IT
     queryset = Offer.objects.all()
-    serializer_class = OfferReadSerializer
+    serializer_class = OfferListReadSerializer

@@ -11,7 +11,10 @@ User = get_user_model()
 
 
 class OrdersGetPostTests(APITestCase):
+    """Test suite for GET and POST requests on the orders endpoint."""
+
     def setUp(self):
+        """Set up test users, offer and URL."""
         self.url = reverse('orders-list')
         self.business_user = User.objects.create_user(
             username="business",
@@ -48,6 +51,9 @@ class OrdersGetPostTests(APITestCase):
                 self.offer_detail_id = offer_detail.id
 
     def test_get_orders_successful(self):
+        """
+        Test successful retrieval of orders.
+        """
         self.client.force_authenticate(user=self.business_user)
         response = self.client.get(self.url, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -58,10 +64,16 @@ class OrdersGetPostTests(APITestCase):
             self.assertTrue(expected_keys.issubset(response.data[0].keys()))
 
     def test_get_orders_not_authenticated(self):
+        """
+        Test retrieval of orders without authentication.
+        """
         response = self.client.get(self.url, format='json')
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_post_order_successful(self):
+        """
+        Test successful creation of an order.
+        """
         self.client.force_authenticate(user=self.customer_user)
         data = {
             "offer_detail_id": self.offer_id
@@ -70,6 +82,9 @@ class OrdersGetPostTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_post_order_offer_id_missing(self):
+        """
+        Test creation of an order with missing offer_detail_id.
+        """
         self.client.force_authenticate(user=self.customer_user)
         data = {
             "offer": self.offer_id  # wrong key name
@@ -78,6 +93,9 @@ class OrdersGetPostTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_post_not_authenticated(self):
+        """
+        Test creation of an order without authentication.
+        """
         data = {
             "offer_detail_id": self.offer_id
         }
@@ -85,6 +103,9 @@ class OrdersGetPostTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_post_wrong_user_type(self):
+        """
+        Test creation of an order with the wrong user type.
+        """
         self.client.force_authenticate(user=self.business_user)
         data = {
             "offer_detail_id": self.offer_id
@@ -93,6 +114,9 @@ class OrdersGetPostTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_post_order_wrong_offer_id(self):
+        """
+        Test creation of an order with a non-existent offer_detail_id.
+        """
         self.client.force_authenticate(user=self.customer_user)
         data = {
             "offer_detail_id": self.offer_id + 99999  # wrong offer_id
@@ -102,7 +126,12 @@ class OrdersGetPostTests(APITestCase):
 
 
 class OrdersPatchDeleteTests(APITestCase):
+    """Test suite for PATCH and DELETE requests on the orders endpoint."""
+
     def setUp(self):
+        """
+        Set up test users, offer and URL.
+        """
         self.business_user = User.objects.create_user(
             username="business",
             email="business@mail.de",
@@ -153,6 +182,9 @@ class OrdersPatchDeleteTests(APITestCase):
         self.url = reverse('orders-detail', kwargs={'pk': self.order.id})
 
     def test_patch_order_successful(self):
+        """
+        Test successful update of an order.
+        """
         self.client.force_authenticate(user=self.business_user)
         data = {
             "status": "completed"
@@ -162,6 +194,9 @@ class OrdersPatchDeleteTests(APITestCase):
         self.assertEqual(response.data['status'], 'completed')
 
     def test_patch_order_wrong_key(self):
+        """
+        Test update of an order with a wrong key.
+        """
         self.client.force_authenticate(user=self.business_user)
         data = {
             "revisions": 1
@@ -170,6 +205,9 @@ class OrdersPatchDeleteTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_patch_order_not_authenticated(self):
+        """
+        Test update of an order without authentication.
+        """
         data = {
             "status": "completed"
         }
@@ -177,6 +215,9 @@ class OrdersPatchDeleteTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_patch_order_wrong_user_type(self):
+        """
+        Test update of an order with the wrong user type.
+        """
         self.client.force_authenticate(user=self.customer_user)
         data = {
             "status": "completed"
@@ -185,6 +226,9 @@ class OrdersPatchDeleteTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_patch_order_not_found(self):
+        """
+        Test update of a non-existent order.
+        """
         wrong_url = reverse(
             'orders-detail', kwargs={'pk': self.order.id + 99999})
         self.client.force_authenticate(user=self.customer_user)
@@ -195,20 +239,32 @@ class OrdersPatchDeleteTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_delete_order_successful(self):
+        """
+        Test successful deletion of an order.
+        """
         self.client.force_authenticate(user=self.admin_user)
         response = self.client.delete(self.url)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
     def test_delete_order_not_authenticated(self):
+        """
+        Test deletion of an order without authentication.
+        """
         response = self.client.delete(self.url)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_delete_order_not_admin(self):
+        """
+        Test deletion of an order by a non-admin user.
+        """
         self.client.force_authenticate(user=self.business_user)
         response = self.client.delete(self.url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_delete_order_not_found(self):
+        """
+        Test deletion of a non-existent order.
+        """
         wrong_url = reverse(
             'orders-detail', kwargs={'pk': self.order.id + 99999})
         self.client.force_authenticate(user=self.admin_user)
@@ -217,7 +273,12 @@ class OrdersPatchDeleteTests(APITestCase):
 
 
 class OrdersExtraTests(APITestCase):
+    """Test suite for extra order-related functionalities."""
+
     def setUp(self):
+        """
+        Set up test users, offer and URL.
+        """
         self.business_user = User.objects.create_user(
             username="business",
             email="business@mail.de",
@@ -272,6 +333,9 @@ class OrdersExtraTests(APITestCase):
         )
 
     def test_get_order_count_successful(self):
+        """
+        Test successful retrieval of order count.
+        """
         url = reverse(
             'order-count', kwargs={'business_user_id': self.business_user.id})
         self.client.force_authenticate(user=self.business_user)
@@ -280,12 +344,18 @@ class OrdersExtraTests(APITestCase):
         self.assertEqual(response.data['order_count'], 2)
 
     def test_get_order_count_not_authenticated(self):
+        """
+        Test retrieval of order count without authentication.
+        """
         url = reverse(
             'order-count', kwargs={'business_user_id': self.business_user.id})
         response = self.client.get(url, format='json')
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_get_order_count_wrong_user_id(self):
+        """
+        Test retrieval of order count with a wrong user ID.
+        """
         url = reverse(
             'order-count', kwargs={'business_user_id': self.business_user.id + 999999})
         self.client.force_authenticate(user=self.business_user)
@@ -293,6 +363,9 @@ class OrdersExtraTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_get_completed_order_count_successful(self):
+        """
+        Test successful retrieval of completed order count.
+        """
         url = reverse('completed-orders',
                       kwargs={'business_user_id': self.business_user.id})
         self.client.force_authenticate(user=self.business_user)
@@ -301,12 +374,18 @@ class OrdersExtraTests(APITestCase):
         self.assertEqual(response.data['order_count'], 2)
 
     def test_get_completed_order_count_not_authenticated(self):
+        """
+        Test retrieval of completed order count without authentication.
+        """
         url = reverse('completed-orders',
                       kwargs={'business_user_id': self.business_user.id})
         response = self.client.get(url, format='json')
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_get_completed_order_count_not_found(self):
+        """
+        Test retrieval of completed order count with a wrong user ID.
+        """
         url = reverse('completed-orders',
                       kwargs={'business_user_id': self.business_user.id + 999999})
         self.client.force_authenticate(user=self.business_user)

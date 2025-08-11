@@ -3,7 +3,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from marketplace_app.models import OfferDetail
+from marketplace_app.models import OfferDetail, Offer
 
 User = get_user_model()
 
@@ -18,7 +18,14 @@ class OfferDetailTests(APITestCase):
             password='password123',
             type='business'
         )
+        self.offer_parent = Offer.objects.create(
+            title="Parent Offer",
+            image=None,
+            description="Parent offer for testing.",
+            user=self.business_user
+        )
         self.offer = OfferDetail.objects.create(
+            offer=self.offer_parent,
             title="Test Offer Detail",
             revisions=3,
             delivery_time_in_days=5,

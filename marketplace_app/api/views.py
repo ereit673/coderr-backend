@@ -2,8 +2,10 @@ from django.db.models import Min
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics, filters
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.permissions import AllowAny
 
 from .filters import OfferFilter
+from .permissions import IsBusiness
 from .serializers import OfferReadSerializer, OfferCreateSerializer
 from marketplace_app.models import Offer
 
@@ -18,6 +20,7 @@ class OfferListCreateView(generics.ListCreateAPIView):
     ordering_fields = ['updated_at', 'min_price']
     search_fields = ['title', 'description']
     pagination_class = PageNumberPagination
+    permission_classes = [AllowAny]
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
@@ -34,6 +37,12 @@ class OfferListCreateView(generics.ListCreateAPIView):
             queryset = queryset.filter(user__id=creator_id)
         queryset = queryset.annotate(min_price=Min('details__price'))
         return queryset
+
+    def get_permissions(self):
+        if self.request.method == 'POST':
+            return [IsBusiness()]
+        else:
+            return [permission() for permission in self.permission_classes]
 
 
 class OfferDetailView(generics.RetrieveAPIView):

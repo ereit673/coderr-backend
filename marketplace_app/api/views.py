@@ -6,8 +6,8 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 
 from .filters import OfferFilter
 from .permissions import IsBusiness, IsOfferOwner
-from .serializers import OfferListReadSerializer, OfferCreateSerializer, OfferRetrieveSerializer
-from marketplace_app.models import Offer
+from .serializers import OfferListReadSerializer, OfferCreateSerializer, OfferRetrieveSerializer, OfferDetailBaseSerializer
+from marketplace_app.models import Offer, OfferDetail
 
 
 class OfferListCreateView(generics.ListCreateAPIView):
@@ -68,5 +68,6 @@ class OfferDetailView(generics.RetrieveAPIView):
     """
     View to retrieve offer details.
     """
-    queryset = Offer.objects.all()
-    serializer_class = OfferListReadSerializer
+    queryset = OfferDetail.objects.all()
+    serializer_class = OfferDetailBaseSerializer
+    permission_classes = [IsAuthenticated]

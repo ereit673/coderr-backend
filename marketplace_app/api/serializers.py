@@ -36,9 +36,10 @@ class UserDetailsSerializer(serializers.ModelSerializer):
         ]
 
 
-class OfferDetailCreateSerializer(serializers.ModelSerializer):
+class OfferDetailBaseSerializer(serializers.ModelSerializer):
     """
-    Serializer for creating OfferDetail with price validation.
+    Base serializer for OfferDetail, used for creating or showing details.
+    It includes fields necessary for creating an offer detail.
     """
     price = serializers.DecimalField(
         max_digits=10,
@@ -130,7 +131,7 @@ class OfferCreateSerializer(serializers.ModelSerializer):
     """
     Serializer for creating an Offer with nested OfferDetails.
     """
-    details = OfferDetailCreateSerializer(many=True, required=False)
+    details = OfferDetailBaseSerializer(many=True, required=False)
 
     class Meta:
         model = Offer

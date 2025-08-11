@@ -152,21 +152,26 @@ class OfferCreateSerializer(serializers.ModelSerializer):
         instance.description = validated_data.get(
             'description', instance.description)
         instance.save()
+
         if details_data is not None:
-            existing_details = {
-                detail.offer_type: detail for detail in instance.details.all()}
-
-            for detail_data in details_data:
-                offer_type = detail_data.get('offer_type')
-                if not offer_type or offer_type not in existing_details:
-                    raise serializers.ValidationError(
-                        f"Invalid or missing offer_type: {offer_type}")
-
-                detail = existing_details[offer_type]
-                for attr, value in detail_data.items():
-                    setattr(detail, attr, value)
-                detail.save()
+            self.update_details(instance, details_data)
         return instance
+
+    def update_details(self, instance, details_data):
+        existing_details = {}
+        for detail in instance.details.all():
+            key = detail.offer_type
+            value = detail
+            existing_details[key] = value
+        for detail_data in details_data:
+            offer_type = detail_data.get('offer_type')
+            if not offer_type or offer_type not in existing_details:
+                raise serializers.ValidationError(
+                    f"Invalid or missing offer_type: {offer_type}")
+            detail_instance = existing_details[offer_type]
+            for field_name, field_value in detail_data.items():
+                setattr(detail_instance, field_name, field_value)
+            detail_instance.save()
 
 
 class OfferRetrieveSerializer(serializers.ModelSerializer):

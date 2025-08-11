@@ -60,6 +60,9 @@ class OfferDetailCreateSerializer(serializers.ModelSerializer):
 
 
 class OfferDetailReadSerializerHyperlink(serializers.ModelSerializer):
+    """
+    Serializer for reading OfferDetail with a hyperlink.
+    """
     url = serializers.HyperlinkedIdentityField(
         view_name='offerdetails-detail',
         lookup_field='pk'
@@ -175,6 +178,9 @@ class OfferCreateSerializer(serializers.ModelSerializer):
 
 
 class OfferRetrieveSerializer(serializers.ModelSerializer):
+    """
+    Serializer for retrieving an Offer with its details.
+    """
     min_price = serializers.SerializerMethodField()
     min_delivery_time = serializers.SerializerMethodField()
     details = OfferDetailReadSerializerHyperlink(many=True, read_only=True)

@@ -40,7 +40,7 @@ class OfferListCreateView(generics.ListCreateAPIView):
     def get_queryset(self):
         queryset = Offer.objects.all()
         creator_id = self.request.query_params.get('creator_id')
-        if creator_id is not None:
+        if creator_id:
             queryset = queryset.filter(user__id=creator_id)
         queryset = queryset.annotate(min_price=Min('details__price'))
         return queryset

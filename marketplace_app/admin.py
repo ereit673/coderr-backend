@@ -15,7 +15,7 @@ class OfferDetailAdmin(admin.ModelAdmin):
     """
     Admin interface for the OfferDetail model.
     """
-    list_display = ('title', 'offer', 'price', 'delivery_time_in_days',
+    list_display = ('id', 'title', 'offer', 'price', 'delivery_time_in_days',
                     'features', 'offer_type')
     search_fields = ('offer__title', 'features')
 

@@ -22,7 +22,7 @@ class OfferFilter(django_filters.FilterSet):
     def filter_min_price(self, queryset, name, value):
         if value in [None, '']:
             return queryset
-        return queryset.filter(details__price=value)
+        return queryset.filter(details__price__gte=value)
 
     def filter_max_delivery_time(self, queryset, name, value):
         if value in [None, '']:

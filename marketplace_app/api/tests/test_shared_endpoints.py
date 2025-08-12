@@ -58,37 +58,37 @@ class SharedEndpointsTests(APITestCase):
             business_user=self.business_user1,
             reviewer=self.customer_user1,
             rating=5,
-            comment="Great service!"
+            description="Great service!"
         )
         self.review2 = Review.objects.create(
             business_user=self.business_user2,
             reviewer=self.customer_user2,
             rating=4,
-            comment="Good experience."
+            description="Good experience."
         )
         self.review3 = Review.objects.create(
             business_user=self.business_user1,
             reviewer=self.customer_user2,
             rating=5,
-            comment="Excellent support!"
+            description="Excellent support!"
         )
         self.review4 = Review.objects.create(
             business_user=self.business_user2,
             reviewer=self.customer_user1,
             rating=1,
-            comment="Terrible experience."
+            description="Terrible experience."
         )
         self.review5 = Review.objects.create(
             business_user=self.business_user3,
             reviewer=self.customer_user1,
             rating=5,
-            comment="Fantastic service!"
+            description="Fantastic service!"
         )
         self.review6 = Review.objects.create(
             business_user=self.business_user3,
             reviewer=self.customer_user2,
             rating=2,
-            comment="Not great."
+            description="Not great."
         )
         self.offer1 = Offer.objects.create(
             user=self.business_user1,
@@ -191,7 +191,7 @@ class SharedEndpointsTests(APITestCase):
         self.assertIn('offer_count', response.data)
         self.assertIn('business_profile_count', response.data)
         self.assertIn('offer_count', response.data)
-        self.assertEqual(response.data['review_count'], 5)
-        self.assertEqual(response.data['offer_count'], 2)
-        self.assertEqual(response.data['business_profile_count'], 2)
+        self.assertEqual(response.data['review_count'], 6)
+        self.assertEqual(response.data['average_rating'], 3.7)
+        self.assertEqual(response.data['business_profile_count'], 3)
         self.assertEqual(response.data['offer_count'], 2)

@@ -1,5 +1,5 @@
 from django.contrib.auth import get_user_model
-from django.db.models import Min, Q
+from django.db.models import Min, Q, Avg
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics, filters
 from rest_framework.exceptions import NotFound
@@ -12,6 +12,7 @@ from .filters import OfferFilter
 from .permissions import IsBusiness, IsOfferOwner, IsCustomer, IsReviewer
 from .serializers import OfferListReadSerializer, OfferCreateSerializer, OfferRetrieveSerializer, OfferDetailBaseSerializer, OrderListSerializer, OrderDetailSerializer, ReviewListSerializer, ReviewDetailSerializer
 from marketplace_app.models import Offer, OfferDetail, Order, Review
+from users_app.models import Profile
 
 User = get_user_model()
 
@@ -176,3 +177,21 @@ class ReviewUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ReviewDetailSerializer
     permission_classes = [IsReviewer, IsAuthenticated]
     http_method_names = ['patch', 'delete', 'options', 'head']
+
+
+class BaseInfoView(APIView):
+    """
+    View to retrieve base information.
+    """
+    permission_classes = [AllowAny]
+
+    def get(self, request, format=None):
+        avg = Review.objects.aggregate(Avg('rating'))['rating__avg']
+        average_rating = round(avg, 1) if avg is not None else None
+        data = {
+            "review_count": Review.objects.count(),
+            "average_rating": average_rating,
+            "business_profile_count": Profile.objects.filter(user__type="business").count(),
+            "offer_count": Offer.objects.count()
+        }
+        return Response(data)

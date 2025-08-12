@@ -17,5 +17,6 @@ urlpatterns = [
          views.OrderCompleteCount.as_view(), name='completed-orders'),
     path('reviews/', views.ReviewListCreateView.as_view(), name='reviews-list'),
     path('reviews/<int:pk>/', views.ReviewUpdateDeleteView.as_view(),
-         name='reviews-detail')
+         name='reviews-detail'),
+    path('base-info/', views.BaseInfoView.as_view(), name='base-info')
 ]

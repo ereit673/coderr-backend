@@ -286,14 +286,18 @@ class OffersRetrieveUpdateDeleteTests(APITestCase):
         )
         self.offer_id = self.offer.id
 
-        self.offer_details_1 = OfferDetail.objects.create(offer=self.offer, title="Basic Test Package", revisions=1, delivery_time_in_days=3,
-                                                          price=50,
-                                                          features=[
-                                                              "Test Feature A",
-                                                              "Test Feature B"
-                                                          ],
-                                                          offer_type="basic"
-                                                          )
+        self.offer_details_1 = OfferDetail.objects.create(
+            offer=self.offer,
+            title="Basic Test Package",
+            revisions=1,
+            delivery_time_in_days=3,
+            price=50,
+            features=[
+                "Test Feature A",
+                "Test Feature B"
+            ],
+            offer_type="basic"
+        )
         self.offer_details_2 = OfferDetail.objects.create(
             offer=self.offer,
             title="Standard Test Package",

@@ -35,3 +35,12 @@ class IsReviewer(BasePermission):
 
     def has_object_permission(self, request, view, obj):
         return request.user.is_authenticated and request.user == obj.reviewer
+
+
+class IsOrderBusinessUser(BasePermission):
+    """
+    Permission to only allow the business user associated with an order to access certain views.
+    """
+
+    def has_object_permission(self, request, view, obj):
+        return request.user.is_authenticated and request.user == obj.business_user

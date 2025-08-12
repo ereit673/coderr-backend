@@ -9,7 +9,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .filters import OfferFilter
-from .permissions import IsBusiness, IsOfferOwner, IsCustomer, IsReviewer
+from .permissions import IsBusiness, IsOfferOwner, IsCustomer, IsOrderBusinessUser, IsReviewer
 from .serializers import OfferListReadSerializer, OfferCreateSerializer, OfferRetrieveSerializer, OfferDetailBaseSerializer, OrderListSerializer, OrderDetailSerializer, ReviewListSerializer, ReviewDetailSerializer
 from marketplace_app.models import Offer, OfferDetail, Order, Review
 from users_app.models import Profile
@@ -112,13 +112,15 @@ class OrderUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
     """
     queryset = Order.objects.all()
     serializer_class = OrderDetailSerializer
-    http_method_names = ['patch', 'delete', 'options', 'head']
+
+    def get(self, request, *args, **kwargs):
+        return Response({'detail': 'Method \"GET\" not allowed.'}, status=405)
 
     def get_permissions(self):
-        if self.request.method == 'PATCH':
-            return [IsBusiness()]
-        elif self.request.method == 'DELETE':
+        if self.request.method == 'DELETE':
             return [IsAdminUser()]
+        else:
+            return [IsOrderBusinessUser()]
 
 
 class OrderCountView(APIView):

@@ -132,7 +132,8 @@ class OrderCountView(APIView):
             User.objects.get(id=business_user_id, type='business')
         except User.DoesNotExist:
             raise NotFound("Business user with this id does not exist.")
-        count = Order.objects.filter(business_user=business_user_id).count()
+        count = Order.objects.filter(
+            business_user=business_user_id, status='in_progress').count()
         return Response({'order_count': count})
 
 

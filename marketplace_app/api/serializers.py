@@ -14,6 +14,9 @@ class RelativeHyperlinkedIdentityField(serializers.HyperlinkedIdentityField):
     """
 
     def to_representation(self, value):
+        """
+        Override the to_representation method to customize the output.
+        """
         full_url = super().to_representation(value)
         parsed = urlparse(full_url)
         path = parsed.path
@@ -122,9 +125,15 @@ class OfferListReadSerializer(serializers.ModelSerializer):
         ]
 
     def get_min_price(self, obj):
+        """
+        Get the minimum price from the offer details.
+        """
         return obj.details.aggregate(min_price=Min('price'))['min_price'] or 0
 
     def get_min_delivery_time(self, obj):
+        """
+        Get the minimum delivery time from the offer details.
+        """
         return obj.details.aggregate(min_delivery_time=Min('delivery_time_in_days'))['min_delivery_time']
 
 
@@ -145,6 +154,9 @@ class OfferCreateSerializer(serializers.ModelSerializer):
         ]
 
     def create(self, validated_data):
+        """
+        Create a new offer.
+        """
         details_data = validated_data.pop('details', [])
         offer = Offer.objects.create(**validated_data)
         for detail_data in details_data:
@@ -152,6 +164,9 @@ class OfferCreateSerializer(serializers.ModelSerializer):
         return offer
 
     def update(self, instance, validated_data):
+        """
+        Update an existing offer.
+        """
         details_data = validated_data.pop('details', None)
         instance.title = validated_data.get('title', instance.title)
         instance.description = validated_data.get(
@@ -163,6 +178,9 @@ class OfferCreateSerializer(serializers.ModelSerializer):
         return instance
 
     def update_details(self, instance, details_data):
+        """
+        Update the offer details.
+        """
         existing_details = {}
         for detail in instance.details.all():
             key = detail.offer_type
@@ -203,9 +221,15 @@ class OfferRetrieveSerializer(serializers.ModelSerializer):
         ]
 
     def get_min_price(self, obj):
+        """
+        Get the minimum price from the offer details.
+        """
         return obj.details.aggregate(min_price=Min('price'))['min_price'] or 0
 
     def get_min_delivery_time(self, obj):
+        """
+        Get the minimum delivery time from the offer details.
+        """
         return obj.details.aggregate(min_delivery_time=Min('delivery_time_in_days'))['min_delivery_time']
 
 
@@ -252,6 +276,9 @@ class OrderListSerializer(serializers.ModelSerializer):
         ]
 
     def create(self, validated_data):
+        """
+        Create a new order.
+        """
         offer = validated_data['offer']
         customer_user = self.context['request'].user
         business_user = offer.offer.user

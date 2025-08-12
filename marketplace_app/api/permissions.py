@@ -26,3 +26,12 @@ class IsOfferOwner(BasePermission):
 
     def has_object_permission(self, request, view, obj):
         return request.user.is_authenticated and request.user == obj.user
+
+
+class IsReviewer(BasePermission):
+    """
+    Permission to only allow the reviewer of a review to access certain views.
+    """
+
+    def has_object_permission(self, request, view, obj):
+        return request.user.is_authenticated and request.user == obj.reviewer

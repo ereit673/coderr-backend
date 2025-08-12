@@ -9,8 +9,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .filters import OfferFilter
-from .permissions import IsBusiness, IsOfferOwner, IsCustomer
-from .serializers import OfferListReadSerializer, OfferCreateSerializer, OfferRetrieveSerializer, OfferDetailBaseSerializer, OrderListSerializer, OrderDetailSerializer, ReviewListSerializer
+from .permissions import IsBusiness, IsOfferOwner, IsCustomer, IsReviewer
+from .serializers import OfferListReadSerializer, OfferCreateSerializer, OfferRetrieveSerializer, OfferDetailBaseSerializer, OrderListSerializer, OrderDetailSerializer, ReviewListSerializer, ReviewDetailSerializer
 from marketplace_app.models import Offer, OfferDetail, Order, Review
 
 User = get_user_model()
@@ -166,3 +166,13 @@ class ReviewListCreateView(generics.ListCreateAPIView):
         if self.request.method == 'POST':
             return [IsCustomer(), IsAuthenticated()]
         return [IsAuthenticated()]
+
+
+class ReviewUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
+    """
+    View to update and delete reviews.
+    """
+    queryset = Review.objects.all()
+    serializer_class = ReviewDetailSerializer
+    permission_classes = [IsReviewer, IsAuthenticated]
+    http_method_names = ['patch', 'delete', 'options', 'head']

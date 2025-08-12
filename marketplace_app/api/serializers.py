@@ -315,6 +315,10 @@ class OrderDetailSerializer(serializers.ModelSerializer):
         """
         Validate the incoming data for order updates.
         """
+        if not self.initial_data:
+            raise serializers.ValidationError(
+                "You must provide at least one field to update."
+            )
         for field in self.initial_data:
             if field != 'status':
                 raise serializers.ValidationError(
@@ -359,3 +363,42 @@ class ReviewListSerializer(serializers.ModelSerializer):
             raise PermissionDenied("You have already reviewed this business.")
         validated_data['reviewer'] = reviewer
         return super().create(validated_data)
+
+
+class ReviewDetailSerializer(serializers.ModelSerializer):
+    """
+    Serializer for retrieving and updating reviews.
+    """
+    class Meta:
+        model = Review
+        fields = [
+            'id',
+            'business_user',
+            'reviewer',
+            'rating',
+            'description',
+            'created_at',
+            'updated_at'
+        ]
+        read_only_fields = [
+            'id',
+            'business_user',
+            'reviewer',
+            'created_at',
+            'updated_at'
+        ]
+
+    def validate(self, attrs):
+        """
+        Validate the incoming data for review updates.
+        """
+        if not self.initial_data:
+            raise serializers.ValidationError(
+                "You must provide at least one field to update."
+            )
+        for field in self.initial_data:
+            if field not in ['rating', 'description']:
+                raise serializers.ValidationError(
+                    "You can only update the rating or the description."
+                )
+        return attrs

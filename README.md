@@ -17,7 +17,9 @@ Coderr Backend is a Django-based REST API for a marketplace platform. It provide
 
 ```
 core/                # Django project settings and configuration
-marketplace_app/     # Marketplace logic: offers, orders, reviews
+offers_app/          # Offers logic: offers, offer details
+orders_app/          # Orders logic: order creation and management
+reviews_app/         # Reviews and base info logic
 users_app/           # User management: registration, profiles
 requirements.txt     # Python dependencies
 manage.py            # Django management script
@@ -73,6 +75,6 @@ manage.py            # Django management script
 
 ## API Overview
 
-- All API endpoints are organized under `/marketplace_app/api/` and `/users_app/api/`.
+- All API endpoints are organized under `/offers_app/api/`, `/orders_app/api/`, `/reviews_app/api/`, and `/users_app/api/`.
 - Authentication is required for most endpoints (see permissions in code).
 - See serializers and views in each app for detailed API structure.

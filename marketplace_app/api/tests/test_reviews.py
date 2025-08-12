@@ -60,9 +60,15 @@ class ReviewsGetPostTests(APITestCase):
         """
         Test posting a review as a customer user.
         """
+        business_user = User.objects.create_user(
+            username="business2",
+            email="business2@mail.de",
+            password="password123",
+            type="business"
+        )
         self.client.force_authenticate(user=self.customer_user)
         data = {
-            "business_user": self.business_user.id,
+            "business_user": business_user.id,
             "rating": 5,
             "description": "Test description"
         }
@@ -149,7 +155,7 @@ class ReviewsPatchDeleteTests(APITestCase):
             "description": "Updated description"
         }
         self.client.force_authenticate(user=self.customer_user)
-        response = self.client.patch(self.url, data, content_type='json')
+        response = self.client.patch(self.url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.old_review.refresh_from_db()
         self.assertEqual(self.old_review.rating, 3)
@@ -163,7 +169,7 @@ class ReviewsPatchDeleteTests(APITestCase):
             "business_user": 5
         }
         self.client.force_authenticate(user=self.customer_user)
-        response = self.client.patch(self.url, data, content_type='json')
+        response = self.client.patch(self.url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_patch_review_not_authenticated(self):
@@ -174,7 +180,7 @@ class ReviewsPatchDeleteTests(APITestCase):
             "rating": 3,
             "description": "Updated description"
         }
-        response = self.client.patch(self.url, data, content_type='json')
+        response = self.client.patch(self.url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_patch_review_another_customer(self):

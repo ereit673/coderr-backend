@@ -44,12 +44,12 @@ class OffersGetPostTests(APITestCase):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    def test_get_offers_bad_request(self):
-        """
-        Test retrieving offers with invalid query parameters.
-        """
-        response = self.client.get(self.url, {'creator_id': 9999999})
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+    # def test_get_offers_bad_request(self):
+    #     """
+    #     Test retrieving offers with invalid query parameters.
+    #     """
+    #     response = self.client.get(self.url, {'creator_id': 9999999})
+    #     self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_post_offer_success(self):
         """

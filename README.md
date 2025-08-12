@@ -34,9 +34,18 @@ manage.py            # Django management script
 
 2. **Create a virtual environment (optional but recommended):**
 
+   **macOS/Linux:**
+
    ```bash
    python3 -m venv venv
    source venv/bin/activate
+   ```
+
+   **Windows (Command Prompt):**
+
+   ```cmd
+   python -m venv venv
+   venv\Scripts\activate
    ```
 
 3. **Install dependencies:**

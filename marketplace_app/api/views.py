@@ -27,6 +27,9 @@ class OfferListCreateView(generics.ListCreateAPIView):
     ordering_fields = ['updated_at', 'min_price']
     search_fields = ['title', 'description']
     pagination_class = PageNumberPagination
+    pagination_class.page_size = 1
+    pagination_class.page_size_query_param = 'page_size'
+
     permission_classes = [AllowAny]
 
     def perform_create(self, serializer):

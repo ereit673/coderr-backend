@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from marketplace_app.models import Offer, OfferDetail, Order
+from marketplace_app.models import Offer, OfferDetail, Order, Review
 
 
 class OfferAdmin(admin.ModelAdmin):
@@ -21,9 +21,20 @@ class OfferDetailAdmin(admin.ModelAdmin):
 
 
 class OrderAdmin(admin.ModelAdmin):
+    """
+    Admin interface for the Order model.
+    """
     list_display = ('id', 'customer_user', 'business_user', 'offer', 'status')
+
+
+class ReviewAdmin(admin.ModelAdmin):
+    """
+    Admin interface for the Review model.
+    """
+    list_display = ('id', 'business_user', 'reviewer', 'rating', 'description')
 
 
 admin.site.register(Offer, OfferAdmin)
 admin.site.register(OfferDetail, OfferDetailAdmin)
 admin.site.register(Order, OrderAdmin)
+admin.site.register(Review, ReviewAdmin)

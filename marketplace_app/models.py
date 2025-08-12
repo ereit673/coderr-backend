@@ -111,7 +111,7 @@ class Review(models.Model):
         User, on_delete=models.CASCADE, related_name='customer_reviews')
     rating = models.PositiveIntegerField(validators=[
         MinValueValidator(1), MaxValueValidator(5)])
-    description = models.TextField(blank=True, null=True)
+    description = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

@@ -10,8 +10,8 @@ from rest_framework.views import APIView
 
 from .filters import OfferFilter
 from .permissions import IsBusiness, IsOfferOwner, IsCustomer
-from .serializers import OfferListReadSerializer, OfferCreateSerializer, OfferRetrieveSerializer, OfferDetailBaseSerializer, OrderListSerializer, OrderDetailSerializer
-from marketplace_app.models import Offer, OfferDetail, Order
+from .serializers import OfferListReadSerializer, OfferCreateSerializer, OfferRetrieveSerializer, OfferDetailBaseSerializer, OrderListSerializer, OrderDetailSerializer, ReviewListSerializer
+from marketplace_app.models import Offer, OfferDetail, Order, Review
 
 User = get_user_model()
 
@@ -146,3 +146,23 @@ class OrderCompleteCount(APIView):
         count = Order.objects.filter(
             business_user=business_user_id, status="completed").count()
         return Response({'completed_order_count': count})
+
+
+class ReviewListCreateView(generics.ListCreateAPIView):
+    """
+    View to list and create reviews.
+    """
+    queryset = Review.objects.all()
+    serializer_class = ReviewListSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [filters.OrderingFilter, DjangoFilterBackend]
+    filterset_fields = ['business_user_id', 'reviewer_id']
+    ordering_fields = ['updated_at', 'rating']
+
+    def perform_create(self, serializer):
+        serializer.save(reviewer=self.request.user)
+
+    def get_permissions(self):
+        if self.request.method == 'POST':
+            return [IsCustomer(), IsAuthenticated()]
+        return [IsAuthenticated()]

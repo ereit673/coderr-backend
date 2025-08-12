@@ -2,7 +2,7 @@ from urllib.parse import urlparse
 
 from django.db.models import Min
 from rest_framework import serializers
-from rest_framework.exceptions import NotFound
+from rest_framework.exceptions import NotFound, PermissionDenied
 
 from marketplace_app.models import Offer, OfferDetail, Order, Review
 from users_app.models import Profile
@@ -321,3 +321,41 @@ class OrderDetailSerializer(serializers.ModelSerializer):
                     "You can only update the 'status' field."
                 )
         return attrs
+
+
+class ReviewListSerializer(serializers.ModelSerializer):
+    """
+    Serializer for listing reviews and creating.
+    """
+    class Meta:
+        model = Review
+        fields = [
+            'id',
+            'business_user',
+            'reviewer',
+            'rating',
+            'description',
+            'created_at',
+            'updated_at'
+        ]
+        read_only_fields = [
+            'id',
+            'reviewer',
+            'created_at',
+            'updated_at'
+        ]
+
+    def create(self, validated_data):
+        """
+        Create a new review.
+        Checks if the business user is valid and if the reviewer has already reviewed the business.
+        """
+        reviewer = self.context['request'].user
+        business_user = validated_data['business_user']
+        if business_user.type != 'business':
+            raise serializers.ValidationError(
+                "You can only review business users.")
+        if Review.objects.filter(business_user=business_user, reviewer=reviewer).exists():
+            raise PermissionDenied("You have already reviewed this business.")
+        validated_data['reviewer'] = reviewer
+        return super().create(validated_data)
